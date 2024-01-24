@@ -2,6 +2,10 @@
 
 The purpose of this project is to create a lightweight dashboard to monitor scripts scheduled and executed by Windows Task Scheduler.
 
+## Installation
+
+```pip install -i https://test.pypi.org/simple/ task-scheduler-dashboard-shauncampbell20==0.5```
+
 ## Configuration
 
 ### Command Line Interface
