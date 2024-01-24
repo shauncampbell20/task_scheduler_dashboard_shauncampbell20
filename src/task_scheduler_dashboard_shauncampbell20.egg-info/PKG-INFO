@@ -1,0 +1,68 @@
+Metadata-Version: 2.1
+Name: task_scheduler_dashboard_shauncampbell20
+Version: 0.5
+Summary: A dashboard for monitoring tasks scheduled with Windows Task Scheduler
+Author: Shaun Campbell
+Project-URL: Homepage, https://github.com/shaundlf/process-dashboard
+Project-URL: Issues, https://github.com/shaundlf/process-dashboard/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# process-dashboard
+
+The purpose of this project is to create a lightweight dashboard to monitor scripts scheduled and executed by Windows Task Scheduler.
+
+## Configuration
+
+### Command Line Interface
+
+`--home` set the directory where logs and database will be stored. Default is ~User\Process Dashboard
+
+`--folder` set the folder containing tasks in Windows Task Scheduler. Default is \\Automation
+
+`--list` or `-l` list the current configuration settings
+
+`--init` or `-i` build the database
+
+```
+python config.py --home "C:\Users\Me\Dashboard" --folder "\Automated Tasks" --init
+```
+
+### Using config module
+
+```
+from process_dashboard_main import config
+config.set_home_directory(r"C:\Users\Me\Dashboard")
+config.set_scheduler_folder("\\Automated Tasks")
+config.init_db()
+```
+
+## Running the Web Application
+
+### Command Line Interface
+
+`--host` set the host domain for the webapp. Default is 127.0.0.1
+
+`--port` set the port for the webapp. Defualt is 7080
+
+`--debug` Start the webapp in debug mode
+
+`--update` or `-u` Update the database with most recent Task Scheduler information
+
+```
+python webapp.py --host 127.0.0.1 --port 8050 --debug --update
+```
+
+### Using webapp module
+
+```
+from process_dashboard_main.webapp import app
+from process_dashboard_main.config import init_db
+init_db()
+app.run_server(host="127.0.0.1", port="8050", debug=True)
+```
+
