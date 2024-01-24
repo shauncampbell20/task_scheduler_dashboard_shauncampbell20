@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "task_scheduler_dashboard_shauncampbell20"
+version = "0.5"
+authors = [
+  { name="Shaun Campbell" },
+]
+description = "A dashboard for monitoring tasks scheduled with Windows Task Scheduler"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/shaundlf/process-dashboard"
+Issues = "https://github.com/shaundlf/process-dashboard/issues"
