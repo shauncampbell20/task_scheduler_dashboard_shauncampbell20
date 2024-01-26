@@ -145,14 +145,13 @@ def last_run_table():
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = html.Div(
-    children=[
+    children=[html.Div(children=[
         dcc.Location(id='url', refresh=False),
         html.Button('Execute', id='execute-button', n_clicks=0, style={'display':'none'}),
         html.Div(id='page-content'),
-        html.Div(id='hidden-div', style={'display':'none'}),
-        html.Div([html.P('Version 0.5', style={'font':'10px Arial, sans-serif',"padding": '0px'})])
-        
-        ]
+        html.Div(id='hidden-div', style={'display':'none'})
+        ]),
+    html.Footer([html.P('Version 0.5.1.1', style={'font':'10px Arial, sans-serif',"padding": '0px', 'position':'absolute', 'left':'-0px', 'bottom':'0px'})])]
 )
 
 @app.callback([Output('page-content', 'children'), Output('execute-button','style')],
