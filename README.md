@@ -74,3 +74,9 @@ from task_scheduler_dashboard_shauncampbell20.config import build
 build() # Updates the database with most recent Task Scheduler information
 app.run_server(host="127.0.0.1", port="8050", debug=True)
 ```
+
+## Scheduling Tasks
+
+Tasks should be created in Windows Task Scheduler within the folder specified in the configuration. Each task's action should be executing a batch file.
+
+The batch files should be formatted as "python path" "script path". Each batch file can have multiple lines that execute different python scripts.
