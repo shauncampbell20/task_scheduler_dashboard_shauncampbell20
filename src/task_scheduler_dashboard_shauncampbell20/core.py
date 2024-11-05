@@ -16,14 +16,12 @@ def create_config_file():
         with open (os.path.join(_loc, 'config.json'), 'w') as f:
             json.dump(configs, f)
 
-
 def get_config(config_name):
     if 'config.json' not in os.listdir(_loc):
         create_config_file()
     with open(os.path.join(_loc, 'config.json'), 'r') as config:
         configs = json.load(config)
     return configs[config_name]
-    
     
 def set_config(config_name, config_value):
     with open(os.path.join(_loc, 'config.json'), 'r') as config:
@@ -32,21 +30,16 @@ def set_config(config_name, config_value):
     with open (os.path.join(_loc, 'config.json'), 'w') as f:
         json.dump(configs, f)
 
-
 if 'config.json' not in os.listdir(_loc):
     create_config_file()
-
 
 with open(os.path.join(_loc, 'config.json'), 'r') as config:
     configs = json.load(config)
 
-
 PROCESS_AUTOMATION_HOME = configs["PROCESS_AUTOMATION_HOME"]
 SCHEDULER_FOLDER = configs["SCHEDULER_FOLDER"]
 DB_NAME = configs["DB_NAME"]
-
-
-        
+    
 resultCodes = {0: 'The operation completed successfully.',
                1: '',
                10: 'The environment is incorrect.',
@@ -65,7 +58,6 @@ resultCodes = {0: 'The operation completed successfully.',
                3221225786: 'The application terminated as a result of a CTRL+C.',
                3228369022: 'Unknown software exception.',
                -2147020576: 'The operator or administrator has refused the request.'}
-
 
 class ProcessLogger(Logger):
     def __init__(self, name=None):
@@ -115,7 +107,6 @@ class ProcessLogger(Logger):
             cursor = local.cursor()
             self.run_id = cursor.execute(
                 f'''SELECT * FROM Runs WHERE script_id = '{self.script_id}' ORDER BY start_time DESC ''').fetchone()[0]
-
 
     def error(self, msg, *args, **kwargs):
         self.errors += 1
@@ -195,4 +186,3 @@ class ProcessLogger(Logger):
                 WHERE run_id = {self.run_id}
             ''')
             local.commit()
-
