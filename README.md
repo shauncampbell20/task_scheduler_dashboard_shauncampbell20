@@ -14,9 +14,13 @@ The purpose of this project is to create a lightweight dashboard to monitor scri
 
 `--folder` set the folder containing tasks in Windows Task Scheduler. Default is \\Automation
 
+`--dbname` set the name of the database. Default is process_automation.db
+
 `--list` or `-l` list the current configuration settings
 
 `--build` or `-b` build the database
+
+`--reset` or `-r` force reset of database (clear tables)
 
 ```
 python config.py --home "C:\Users\Me\Dashboard" --folder "\Automated Tasks" --build
