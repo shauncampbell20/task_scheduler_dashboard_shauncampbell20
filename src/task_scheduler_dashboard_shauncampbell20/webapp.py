@@ -91,7 +91,6 @@ def format_home_table(df):
         style_as_list_view=True, fill_width=False, sort_action="native", )
     return table
 
-
 def format_hist_table(df):
     table = dash_table.DataTable(
         data=df.to_dict(orient='records'),
@@ -115,7 +114,6 @@ def format_hist_table(df):
         ],
         style_as_list_view=True, fill_width=False)
     return table
-
 
 def last_run_table():
     # Returns table with information for the last run of each task in Tasks that has run
@@ -152,7 +150,6 @@ def last_run_table():
         ''', local).fillna('')
     return run_table
 
-
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = html.Div(
     children=[html.Div(children=[
@@ -161,7 +158,7 @@ app.layout = html.Div(
         html.Div(id='page-content'),
         html.Div(id='hidden-div', style={'display':'none'})
         ]),
-    html.Footer([html.P('Version 0.5.3', style={'font':'10px Arial, sans-serif',"padding": '0px', 'position':'absolute', 'left':'-0px', 'bottom':'0px'})])]
+    html.Footer([html.P('Version 0.5.4', style={'font':'10px Arial, sans-serif',"padding": '0px', 'position':'absolute', 'left':'-0px', 'bottom':'0px'})])]
 )
 
 @app.callback([Output('page-content', 'children'), Output('execute-button','style')],
@@ -246,4 +243,3 @@ if __name__ == "__main__":
     host = get_config('HOST')
     port = get_config('PORT')
     app.run_server(host=host, port=port, debug=debug)
-    
