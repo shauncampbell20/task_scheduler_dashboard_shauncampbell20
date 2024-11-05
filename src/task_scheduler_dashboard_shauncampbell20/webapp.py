@@ -50,7 +50,7 @@ def format_home_table(df):
             {
                 'if': {
                     'filter_query': '{Result} = success',  # matching rows of a hidden column with the id, `id`
-                    'column_id': 'Records'
+                    'column_id': 'Result'
                 },
                 'backgroundColor': 'green',
                 'color': 'white'
@@ -58,25 +58,33 @@ def format_home_table(df):
             {
                 'if': {
                     'filter_query': '{Result} = error',  # matching rows of a hidden column with the id, `id`
-                    'column_id': 'Records'
+                    'column_id': 'Result'
+                },
+                'backgroundColor': '#ff9696',
+                'color': 'white'
+            },
+            {
+                'if': {
+                    'filter_query': "{Result} = 'no records'",  # matching rows of a hidden column with the id, `id`
+                    'column_id': 'Result'
+                },
+                'backgroundColor': '#f1f1f1',
+                'color': 'black'
+            },
+            {
+                'if': {
+                    'filter_query': "{Result} = 'critical'",  # matching rows of a hidden column with the id, `id`
+                    'column_id': 'Result'
                 },
                 'backgroundColor': 'red',
                 'color': 'white'
             },
             {
                 'if': {
-                    'filter_query': "{Result} = 'no records'",  # matching rows of a hidden column with the id, `id`
-                    'column_id': 'Records'
+                    'filter_query': "{Result} = 'warning'",  # matching rows of a hidden column with the id, `id`
+                    'column_id': 'Result'
                 },
-                'backgroundColor': '#f0f0f0',
-                'color': 'black'
-            },
-            {
-                'if': {
-                    'filter_query': "{Errors} > 0",  # matching rows of a hidden column with the id, `id`
-                    'column_id': 'Errors'
-                },
-                'backgroundColor': '#ff9696',
+                'backgroundColor': '#ffc64d',
                 'color': 'white'
             }
         ],
@@ -113,32 +121,34 @@ def last_run_table():
     # Returns table with information for the last run of each task in Tasks that has run
     with sqlite3.connect(process_automation_db) as local:
         run_table = pd.read_sql_query('''
-        WITH tab as (
-        SELECT * FROM Runs WHERE run_id IN (
-        SELECT
-        MAX(run_id) as run_id
-        FROM Runs
-        GROUP BY script_id
-        ORDER BY end_time DESC)
-        ) 
+            WITH tab as (
+            SELECT * FROM Runs WHERE run_id IN (
+            SELECT
+            MAX(run_id) as run_id
+            FROM Runs
+            GROUP BY script_id
+            ORDER BY end_time DESC)
+            ) 
 
-        SELECT 
-        Tasks.script_id as Task,
-        tab.start_time as StartTime,
-        tab.end_time as EndTime,
-        tab.records as Records,
-        tab.errors as Errors,
-        tab.result as Result,
-        tab.log_file as LogFile,
-        Executors.name as Executor,
-        Executors.state as Status,
-        Executors.last_run_time as LastRunTime,
-        Executors.next_run_time as NextRunTime,
-        Executors.last_run_result as LastRunResult
-        FROM Tasks
-        LEFT JOIN tab ON Tasks.script_id = tab.script_id 
-        LEFT JOIN Executors ON Tasks.command = Executors.command
-        WHERE Executors.state <> 'Disabled'
+            SELECT 
+            Tasks.script_id as Task,
+            tab.start_time as StartTime,
+            tab.end_time as EndTime,
+            tab.result as Result,
+            tab.records as Records,
+            tab.errors as Errors,
+            tab.warnings as Warnings,
+            tab.log_file as LogFile,
+            tab.user as RanBy,
+            tab.machine as Machine,
+            Executors.name as Executor,
+            Executors.state as Status,
+            Executors.last_run_time as LastRunTime,
+            Executors.next_run_time as NextRunTime
+            FROM Tasks
+            LEFT JOIN tab ON Tasks.script_id = tab.script_id 
+            LEFT JOIN Executors ON Tasks.command = Executors.command
+            --WHERE Executors.state <> 'Disabled'
         ''', local).fillna('')
     return run_table
 
@@ -151,7 +161,7 @@ app.layout = html.Div(
         html.Div(id='page-content'),
         html.Div(id='hidden-div', style={'display':'none'})
         ]),
-    html.Footer([html.P('Version 0.5.1.1', style={'font':'10px Arial, sans-serif',"padding": '0px', 'position':'absolute', 'left':'-0px', 'bottom':'0px'})])]
+    html.Footer([html.P('Version 0.5.3', style={'font':'10px Arial, sans-serif',"padding": '0px', 'position':'absolute', 'left':'-0px', 'bottom':'0px'})])]
 )
 
 @app.callback([Output('page-content', 'children'), Output('execute-button','style')],
@@ -169,8 +179,8 @@ def display_page(pathname):
     elif path in dat['Task'].tolist():
         with sqlite3.connect(process_automation_db) as local_con:
             hist = pd.read_sql_query(
-                f'''SELECT script_id, start_time, end_time, records, errors, result, 
-                log_file FROM Runs WHERE script_id = '{path}' ORDER BY start_time DESC''',
+                f'''SELECT script_id, start_time, end_time, records, errors, warnings, result, 
+                log_file, user, machine FROM Runs WHERE script_id = '{path}' ORDER BY start_time DESC''',
                 local_con)
             info = pd.read_sql_query(f'''SELECT * FROM Tasks WHERE script_id = '{path}' ''', local_con).to_dict('index')[0]
         hist['log_file'] = ['[%s](/%s)' % (i, i) for i in hist['log_file'].tolist()]
@@ -220,11 +230,10 @@ if __name__ == "__main__":
     parser.add_argument('--update', '-u', action='store_true')
     args = parser.parse_args()
     host = '127.0.0.1'
-    port = '7080'
+    port = '8050'
     debug = False
     if args.host:
         set_config('HOST', args.host)
-        
     if args.port:
         set_config('PORT', args.port)
         port = args.port
