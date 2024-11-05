@@ -72,13 +72,15 @@ class ProcessLogger(Logger):
         if not name:
             name = os.path.splitext(os.path.split(inspect.stack()[1][1])[-1])[0]
         super().__init__(name)
-        self.start_time = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.start_time = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
         self.records = 0
         self.errors = 0
         self.warnings = 0
-        self.critical = 0
+        self.criticals = 0
         self.result = ''
         self.script_id = name
+        self.user = os.getlogin()
+        self.machine = os.environ['COMPUTERNAME']
         self.process_automation_db = os.path.join(PROCESS_AUTOMATION_HOME, DB_NAME)
         self.process_automation_logs = os.path.join(PROCESS_AUTOMATION_HOME, 'logs')
         if not os.path.exists(self.process_automation_logs):
@@ -96,8 +98,8 @@ class ProcessLogger(Logger):
             with sqlite3.connect(self.process_automation_db) as local:
                 cursor = local.cursor()
                 cursor.execute('''INSERT INTO Runs (script_id, log_file, start_time, 
-                end_time, records, result, errors) VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                                    (self.script_id, self.log_file, self.start_time, '', 0, 'running', 0))
+                end_time, records, result, errors, warnings) VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                                    (self.script_id, self.log_file, self.start_time, '', 0, 'running', 0, 0))
                 local.commit()
         except:
             from task_scheduler_dashboard_shauncampbell20.config import build
@@ -105,8 +107,8 @@ class ProcessLogger(Logger):
             with sqlite3.connect(self.process_automation_db) as local:
                 cursor = local.cursor()
                 cursor.execute('''INSERT INTO Runs 
-                (script_id, log_file, start_time, end_time, records, result, errors) VALUES 
-                (?, ?, ?, ?, ?, ?, ?)''', (self.script_id, self.log_file, self.start_time, '', 0, 'running', 0))
+                (script_id, log_file, start_time, end_time, records, result, errors, warnings) VALUES 
+                (?, ?, ?, ?, ?, ?, ?, ?)''', (self.script_id, self.log_file, self.start_time, '', 0, 'running', 0, 0))
                 local.commit()
         
         with sqlite3.connect(self.process_automation_db) as local:
@@ -124,7 +126,7 @@ class ProcessLogger(Logger):
         self.log(30, msg, *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):
-        self.critical += 1
+        self.criticals += 1
         self.log(50, msg, *args, **kwargs)
     
     def last_run(self):
@@ -136,12 +138,48 @@ class ProcessLogger(Logger):
             else:
                 return last_ran
     
+    def progress(self, iterable, records = True):
+        if inspect.isgenerator(iterable):
+            iterable = [i for i in iterable]
+        total = len(iterable)
+        num = 1
+        for item in iterable:
+            s = '+PROGRESS |'
+            s += '-'*int(num/total*10)
+            s += ' '*(10-int(num/total*10))
+            s += '| '
+            s += '{:.1%}'.format(num/total)
+            with open(self.log_path, 'r', encoding='UTF-8') as f:
+                cur_log = f.readlines()
+            if '+PROGRESS' in cur_log[-1]:
+                cur_log[-1] = s
+            else:
+                cur_log.extend(s)
+            with open(self.log_path, 'w', encoding='UTF-8') as f:
+                f.write(''.join(cur_log))
+                
+            yield item
+            num += 1
+            if records == True:
+                self.records += 1
+        with open(self.log_path, 'r', encoding='UTF-8') as f:
+            cur_log = f.read()
+        cur_log += '\n'
+        with open(self.log_path, 'w', encoding='UTF-8') as f:
+            f.write(cur_log)
+                
     def complete(self):
-        end_time = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        end_time = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
         self.info('execution for %s completed.' % self.script_id)
-        if self.records == 0 and self.result == '':
+        if self.criticals > 0:
+            self.result = 'critical'
+        elif self.errors > 0:
+            self.result = 'error'
+        elif self.warnings > 0:
+            self.result = 'warning'
+        elif self.records == 0:
             self.result = 'no records'
-        elif self.result == '' and self.records > 0 and self.errors == 0:
+        else:
             self.result = 'success'
         with sqlite3.connect(self.process_automation_db) as local:
             cursor = local.cursor()
@@ -150,7 +188,10 @@ class ProcessLogger(Logger):
                 SET end_time = '{end_time}', 
                 records = {self.records}, 
                 result = '{self.result}', 
-                errors = {self.errors} 
+                errors = {self.errors},
+                warnings = {self.warnings},
+                user = '{self.user}',
+                machine = '{self.machine}'
                 WHERE run_id = {self.run_id}
             ''')
             local.commit()
