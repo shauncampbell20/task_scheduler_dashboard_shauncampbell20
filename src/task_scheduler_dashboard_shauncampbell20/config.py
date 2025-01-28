@@ -136,8 +136,13 @@ def build(update=True):
     
     # Create directory PROCESS_AUTOMATION_HOME if doesn't exist
     if not os.path.exists(PROCESS_AUTOMATION_HOME):
-        os.mkdir(PROCESS_AUTOMATION_HOME)
-        warnings.warn('Created directory '+PROCESS_AUTOMATION_HOME)
+        x = input(f'Create directory {PROCESS_AUTOMATION_HOME}? [Y/N]')
+        if x == 'Y':
+            os.mkdir(PROCESS_AUTOMATION_HOME)
+            warnings.warn(f'Created directory {PROCESS_AUTOMATION_HOME}')
+        else:
+            print('**Set home folder with --home argument')
+            quit()
     
     # Create logs directory in PROCESS_AUTOMATION_HOME if doesn't exist
     process_automation_logs = os.path.join(PROCESS_AUTOMATION_HOME, 'logs')
@@ -246,7 +251,6 @@ if __name__ == "__main__":
     if args.port:
         set_config('PORT', args.port)
     if args.list:
-        print('test')
         list_configs()
     if args.reset:
         build(update=False)
