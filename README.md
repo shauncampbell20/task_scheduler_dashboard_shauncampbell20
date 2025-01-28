@@ -69,7 +69,7 @@ pl.complete()
 `--run` Run the webapp
 
 ```
-task_scheduler --host 127.0.0.1 --port 8050 --debug --update
+task_scheduler --host 127.0.0.1 --port 8050 --debug --run
 ```
 
 ### Using webapp module
