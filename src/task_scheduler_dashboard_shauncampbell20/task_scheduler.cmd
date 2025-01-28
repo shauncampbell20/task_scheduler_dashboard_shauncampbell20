@@ -1,2 +1,2 @@
 @ECHO OFF
-python config.py %*
+python %~dp0/config.py %*
