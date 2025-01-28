@@ -6,7 +6,7 @@ import pandas as pd
 import os
 import sqlite3
 import re
-from task_scheduler_dashboard_shauncampbell20.core import PROCESS_AUTOMATION_HOME, DB_NAME, set_config, get_config
+from core import PROCESS_AUTOMATION_HOME, DB_NAME, set_config, get_config
 import sys
 import argparse
 from subprocess import Popen, CREATE_NEW_CONSOLE

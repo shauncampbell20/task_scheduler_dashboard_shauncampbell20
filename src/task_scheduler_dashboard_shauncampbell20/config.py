@@ -3,7 +3,7 @@ import sqlite3
 import re
 import pandas as pd
 import sys
-from task_scheduler_dashboard_shauncampbell20.core import resultCodes, _loc, set_config
+from core import resultCodes, _loc, set_config
 import argparse
 import json
 import warnings
@@ -71,7 +71,7 @@ def parse_task_scheduler(SCHEDULER_FOLDER):
     return d
 
 def build(update=True):
-    ## Main function for building and updated the database
+    ## Main function for building and updating the database
     
     def create_run_table():
         # Create run table if it does not exist
@@ -164,10 +164,9 @@ def build(update=True):
     # Get Task Scheduler information
     d = parse_task_scheduler(SCHEDULER_FOLDER)
 
-    # Insert Task Scheduler Information into Executors table if task is not disabled
+    # Insert Task Scheduler Information into Executors table
     cursor.execute(f'''DELETE FROM Executors WHERE machine = '{machine}' ''')
     for pname in d.keys():
-        if d[pname]['State'] != 'Disabled':
             cursor.execute(f'''
             INSERT INTO Executors 
             VALUES ('{pname}', '{d[pname]['State']}', '{str(d[pname]['Next Run'])}', 

@@ -10,6 +10,7 @@ import warnings
 _loc = os.path.split(__file__)[0]
 
 def create_config_file():
+    # Create config file in current directory
     if 'config.json' not in os.listdir(_loc):
         default = os.path.join(os.path.expanduser('~'),'Process Dashboard')
         configs = {'PROCESS_AUTOMATION_HOME': default, 'SCHEDULER_FOLDER': '\\Automation', 'DB_NAME':'process_automation.db','HOST':'127.0.0.1', 'PORT':'8050'}
@@ -17,6 +18,7 @@ def create_config_file():
             json.dump(configs, f)
 
 def get_config(config_name):
+    # Get a named config from config file
     if 'config.json' not in os.listdir(_loc):
         create_config_file()
     with open(os.path.join(_loc, 'config.json'), 'r') as config:
@@ -24,18 +26,20 @@ def get_config(config_name):
     return configs[config_name]
     
 def set_config(config_name, config_value):
+    # Set a named config in the config file
     with open(os.path.join(_loc, 'config.json'), 'r') as config:
         configs = json.load(config)
     configs[config_name] = config_value
     with open (os.path.join(_loc, 'config.json'), 'w') as f:
         json.dump(configs, f)
 
+# Create config file if not present in directory
 if 'config.json' not in os.listdir(_loc):
     create_config_file()
 
+# Load configs
 with open(os.path.join(_loc, 'config.json'), 'r') as config:
     configs = json.load(config)
-
 PROCESS_AUTOMATION_HOME = configs["PROCESS_AUTOMATION_HOME"]
 SCHEDULER_FOLDER = configs["SCHEDULER_FOLDER"]
 DB_NAME = configs["DB_NAME"]
@@ -60,7 +64,14 @@ resultCodes = {0: 'The operation completed successfully.',
                -2147020576: 'The operator or administrator has refused the request.'}
 
 class ProcessLogger(Logger):
+    ''' Wrapper for logging.Logger object
+        Sets file handler to write logs to PROCESS_AUTOMATION_HOME/logs
+        Integrates with PROCESS_AUTOMATION_HOME/DB_NAME to update it when tasks run/complete
+    '''
     def __init__(self, name=None):
+        ''' sets file handler and adds record to Runs table
+            calls config.build() to initialize database if it does not exist
+        '''
         if not name:
             name = os.path.splitext(os.path.split(inspect.stack()[1][1])[-1])[0]
         super().__init__(name)
@@ -109,18 +120,22 @@ class ProcessLogger(Logger):
                 f'''SELECT * FROM Runs WHERE script_id = '{self.script_id}' ORDER BY start_time DESC ''').fetchone()[0]
 
     def error(self, msg, *args, **kwargs):
+        # Increment errors by 1 and log to file
         self.errors += 1
         self.log(40, msg, *args, **kwargs)
 
     def warning(self, msg, *args, **kwargs):
+        # Increment warnings by 1 and log to file
         self.warnings += 1
         self.log(30, msg, *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):
+        # Increment criticals by 1 and log to file
         self.criticals += 1
         self.log(50, msg, *args, **kwargs)
     
     def last_run(self):
+        # Retrieves date last ran for script_id
         with sqlite3.connect(self.process_automation_db) as local:
             cursor = local.cursor()
             last_ran = cursor.execute(f'''SELECT start_time FROM Runs WHERE script_id = '{self.script_id}' ORDER BY start_time DESC ''').fetchone()[0]
@@ -130,6 +145,7 @@ class ProcessLogger(Logger):
                 return last_ran
     
     def progress(self, iterable, records = True):
+        # function to add incrementing progress bar to log file
         if inspect.isgenerator(iterable):
             iterable = [i for i in iterable]
         total = len(iterable)
@@ -160,6 +176,7 @@ class ProcessLogger(Logger):
             f.write(cur_log)
                 
     def complete(self):
+        # Update Runs table with results
         end_time = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
         self.info('execution for %s completed.' % self.script_id)
         if self.criticals > 0:
