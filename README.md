@@ -10,6 +10,8 @@ The purpose of this project is to create a lightweight dashboard to monitor scri
 
 ### Command Line Interface
 
+Add install location to PATH to use `task_scheduler` command.
+
 `--home` set the directory where logs and database will be stored. Default is ~User\Process Dashboard
 
 `--folder` set the folder containing tasks in Windows Task Scheduler. Default is \\Automation
@@ -18,12 +20,12 @@ The purpose of this project is to create a lightweight dashboard to monitor scri
 
 `--list` or `-l` list the current configuration settings
 
-`--build` or `-b` build the database
+`--update` or `-u` Update the database with most recent Task Scheduler information, or build the database if initializing for the first time.
 
 `--reset` or `-r` force reset of database (clear tables)
 
 ```
-python config.py --home "C:\Users\Me\Dashboard" --folder "\Automated Tasks" --build
+task_scheduler --home "C:\Users\Me\Dashboard" --folder "\Automated Tasks" --update
 ```
 
 ### Using config module
@@ -64,10 +66,10 @@ pl.complete()
 
 `--debug` Start the webapp in debug mode
 
-`--update` or `-u` Update the database with most recent Task Scheduler information
+`--run` Run the webapp
 
 ```
-python webapp.py --host 127.0.0.1 --port 8050 --debug --update
+task_scheduler --host 127.0.0.1 --port 8050 --debug --update
 ```
 
 ### Using webapp module
