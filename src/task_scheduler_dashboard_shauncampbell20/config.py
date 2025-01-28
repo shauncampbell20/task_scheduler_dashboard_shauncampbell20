@@ -227,9 +227,13 @@ if __name__ == "__main__":
     parser.add_argument('--home', type=str)
     parser.add_argument('--folder', type=str)
     parser.add_argument('--dbname', type=str)
+    parser.add_argument('--host', type=str)
+    parser.add_argument('--port', type=str)
+    parser.add_argument('--debug', action='store_true')
     parser.add_argument('--list', '-l' , action='store_true')
-    parser.add_argument('--build', '-b' , action='store_true')
+    parser.add_argument('--update', '-u' , action='store_true')
     parser.add_argument('--reset', '-r' , action='store_true')
+    parser.add_argument('--run', action='store_true')
     args = parser.parse_args()
     if args.home:
         set_config('PROCESS_AUTOMATION_HOME', args.home)
@@ -237,10 +241,22 @@ if __name__ == "__main__":
         set_config('SCHEDULER_FOLDER', args.folder)
     if args.dbname:
         set_config('DB_NAME', args.dbname)
+    if args.host:
+        set_config('HOST', args.host)
+    if args.port:
+        set_config('PORT', args.port)
     if args.list:
+        print('test')
         list_configs()
     if args.reset:
         build(update=False)
-    elif args.build:
+    elif args.update:
         build(update=True)
+    if args.run:
+        build(update=True)
+        from webapp import *
+        debug = args.debug
+        host = get_config('HOST')
+        port = get_config('PORT')
+        app.run_server(host=host, port=port, debug=debug)
         
