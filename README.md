@@ -4,7 +4,7 @@ The purpose of this project is to create a lightweight dashboard to monitor scri
 
 ## Installation
 
-```pip install -i https://test.pypi.org/simple/ task-scheduler-dashboard-shauncampbell20==0.5```
+```pip install -i https://test.pypi.org/simple/ task-scheduler-dashboard-shauncampbell20==1.0```
 
 ## Configuration
 

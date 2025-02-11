@@ -1,10 +1,12 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = [
+        "setuptools>=61.0",
+        "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "task_scheduler_dashboard_shauncampbell20"
-version = "0.5"
+version = "1.0"
 authors = [
   { name="Shaun Campbell" },
 ]
@@ -18,5 +20,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/shaunyboy20/task_scheduler_dashboard_shauncampbell20"
-Issues = "https://github.com/shaunyboy20/task_scheduler_dashboard_shauncampbell20/issues"
+Homepage = "https://github.com/shauncampbell20/task_scheduler_dashboard_shauncampbell20"
+Issues = "https://github.com/shauncampbell20/task_scheduler_dashboard_shauncampbell20/issues"
